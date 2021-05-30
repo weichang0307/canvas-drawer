@@ -74,6 +74,10 @@ let isnext=false
 let iscolor=true
 let all=[]
 let choose=0
+let isctrl=false
+let clone={}
+let clonex=0
+let cloney=0
 
 
 function init(){
@@ -99,6 +103,7 @@ function init(){
 	canvas.addEventListener('mousemove',mousemove)
 	canvas.addEventListener('click',click)
 	window.addEventListener('keydown',keydown)
+	window.addEventListener('keyup',keyup)
 }
 function update(){	
 	if(ispress){
@@ -168,6 +173,7 @@ function update(){
 		all.push(finishline)
 		drawmd=0
 	}
+	
 
 
 
@@ -209,6 +215,12 @@ function draw(){
 			ctx.fillRect(all[choose].p.x+800-5,all[choose].p.y+300-5,10,10)
 		}
 		
+	}
+	if(drawmd===2){
+		drawer([clone])
+		ctx.font='20px Verdana'
+		ctx.fillStyle='black'
+		ctx.fillText('clone x:'+clonex+' y:'+cloney,30,250)
 	}
 		
 	
@@ -358,21 +370,28 @@ function keydown(e){
 		if(drawmd===0&&all.length>0){
 			drawmd=1
 		}
+
 			
 	}
-	if(keyid==='KeyS'){
-		if(drawmd===12){
-			recting.stroke.color=color
-			recting.stroke.is=iscolor
+	if(keyid==='KeyB'){
+		if(drawmd%10!==0||drawmd===30){
+			drawmd-=1
+			if(drawmd===40){
+				lineing.isclose=false
+			}
+		}else{
+			if(drawmd===10){
+				recting={p:{x:0,y:0},type:'rect',topleft:{x:0,y:0},rightbottom:{x:0,y:0},stroke:{is:true,color:'rgb(0,0,0)',width:2},fill:{is:true,color:'rgb(0,0,0)'},translate:{x:0,y:0},deg:0,scale:{x:1,y:1},through:0}
+				drawmd=0
+			}else if(drawmd===20){
+				circleing={p:{x:0,y:0},type:'circle',position:{x:0,y:0},rr:5,startdeg:0,enddeg:Math.PI*2,isclose:true,isrr:false,stroke:{is:true,color:'rgb(0,0,0)',width:2},fill:{is:true,color:'rgb(0,0,0)'},translate:{x:0,y:0},deg:0,scale:{x:1,y:1},through:0}
+				drawmd=0
+			}else if(drawmd===40){
+				lineing={p:{x:0,y:0},type:'line',pointarray:[],stroke:{is:true,color:'rgb(0,0,0)',width:2},fill:{is:true,color:'rgb(0,0,0)'},translate:{x:0,y:0},deg:0,scale:{x:1,y:1},through:0,iscolse:false}
+				drawmd=0
+			}
 		}
-		if(drawmd===26){
-			circleing.stroke.color=color
-			circleing.stroke.is=iscolor
-		}
-		if(drawmd===41){
-			lineing.stroke.color=color
-			lineing.stroke.is=iscolor
-		}
+
 			
 	}
 	if(keyid==='KeyF'){
@@ -388,6 +407,18 @@ function keydown(e){
 			lineing.fill.color=color
 			lineing.fill.is=iscolor
 		}
+		if(drawmd===12){
+			recting.stroke.color=color
+			recting.stroke.is=iscolor
+		}
+		if(drawmd===26){
+			circleing.stroke.color=color
+			circleing.stroke.is=iscolor
+		}
+		if(drawmd===41){
+			lineing.stroke.color=color
+			lineing.stroke.is=iscolor
+		}
 			
 	}
 	if(keyid==='KeyC'){
@@ -395,7 +426,20 @@ function keydown(e){
 			lineing.isclose=true
 			drawmd=41
 		}
+		if(drawmd===1&&isctrl){
+			clone=$.extend(true, {},all[choose])
+			drawmd=2
+		}
 		
+	}
+	if(keyid==='KeyV'){
+		if(drawmd===2&&isctrl){
+			all.push(clone)
+			drawmd=0
+			clonex=0
+			cloney=0
+			clone={}
+		}
 	}
 	if(keyid==='KeyE'){
 		if(drawmd===40){
@@ -443,6 +487,17 @@ function keydown(e){
 		if(drawmd===45){
 			lineing.scale.y+=0.1
 		}
+		if(drawmd===2){
+			clone.translate.y-=5
+			clonex-=5
+		}
+		if(drawmd===1){
+			all.push(all[choose])
+			all.splice(choose,1)
+			choose=all.length-1
+			
+			
+		}
 	}
 	if(keyid==='ArrowDown'){
 		if(drawmd===14){
@@ -480,6 +535,10 @@ function keydown(e){
 		}
 		if(drawmd===45){
 			lineing.scale.y-=0.1
+		}
+		if(drawmd===2){
+			clone.translate.y+=5
+			cloney+=5
 		}
 	}
 	if(keyid==='ArrowLeft'){
@@ -531,6 +590,10 @@ function keydown(e){
 			}else{
 				choose=all.length-1
 			}
+		}
+		if(drawmd===2){
+			clone.translate.x-=5
+			clonex-=5
 		}
 	}
 	if(keyid==='ArrowRight'){
@@ -599,8 +662,32 @@ function keydown(e){
 				choose=0
 			}
 		}
+		if(drawmd===2){
+			clone.translate.x+=5
+			clonex+=5
+		}
 
 	}
+	if(keyid==='KeyS'){
+		if(drawmd===1){
+			if(all[choose].type==='rect'){
+				recting=all[choose]
+				drawmd=10
+			}
+			if(all[choose].type==='circle'){
+				circleing=all[choose]
+				drawmd=20
+			}
+			if(all[choose].type==='line'){
+				lineing=all[choose]
+				drawmd=40
+			}
+			all.splice(choose,1)
+			
+			
+		}
+	}
+	
 	if(keyid==='Backspace'){
 		if(drawmd===40){
 			lineing.pointarray.pop()
@@ -609,9 +696,17 @@ function keydown(e){
 			all.splice(choose,1)
 			drawmd=0
 		}
-
+	}
+	if(keyid==='ControlLeft'){
+		isctrl=true
 	}
 	
+}
+function keyup(e){
+	let keyid=e.code
+	if(keyid==='ControlLeft'){
+		isctrl=false
+	}
 }
 function click(e){
 	if(drawmd>=10&&drawmd<20){
